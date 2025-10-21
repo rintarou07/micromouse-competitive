@@ -375,7 +375,6 @@ if __name__ == "__main__":
     if maze == None:
         firstRun()
     else:
-        log(maze)
         secondRun(maze)
     
     
