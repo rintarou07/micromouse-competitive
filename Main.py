@@ -6,9 +6,9 @@ import math
 import heapq
 
 
-WIDTH = 16#API.mazeWidth()
-HEIGHT =16 #API.mazeHeight()
-GOAL = (7,7)
+WIDTH = API.mazeWidth()
+HEIGHT =API.mazeHeight()
+GOAL = (8,8)
 DIRECTIONS = {
     "right": (1,0),
     "left": (-1,0),
@@ -375,6 +375,7 @@ if __name__ == "__main__":
     if maze == None:
         firstRun()
     else:
+        log(maze)
         secondRun(maze)
     
     
