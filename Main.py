@@ -8,7 +8,7 @@ import heapq
 
 WIDTH = API.mazeWidth()
 HEIGHT =API.mazeHeight()
-GOAL = (8,8)
+GOAL = (7,8)
 DIRECTIONS = {
     "right": (1,0),
     "left": (-1,0),
@@ -177,7 +177,7 @@ def generateMaze(walls,fileName):
         f.write(jsonFile)
 
 
-def floodFill(currentx,currenty,distances,walls):
+def oldFloodFill(currentx,currenty,distances,walls):
     q = deque()
     q.appendleft((currentx,currenty))
     while q:
@@ -196,28 +196,30 @@ def floodFill(currentx,currenty,distances,walls):
             if x < WIDTH-1 and distances[x+1][y] != 0:
                 q.appendleft((x+1,y))
     return
-def NewfloodFill(distances, walls, visited):
+def floodFill(distances, walls, visited,mouse):
     q = deque()
-    found_unvisited = False
+    foundUnvisited = False
     for x in range(WIDTH):
         for y in range(HEIGHT):
             if not visited[x][y]:
                 distances[x][y] = 0
                 q.append((x,y)) 
-                found_unvisited = True
+                foundUnvisited = True
             else:
                 distances[x][y] = 255 
 
-    if not found_unvisited:
+    if not foundUnvisited:
         return False
     while q:
         (x,y) = q.popleft()
-        current_dist = distances[x][y]
-        
-        for (nx, ny) in getOpenNeighbors(x, y, walls):
+        currentDist = distances[x][y]
+        neighbors  = getOpenNeighbors(x, y, walls)
+        for (nx, ny) in neighbors:
             if visited[nx][ny] and distances[nx][ny] == 255: 
-                distances[nx][ny] = current_dist + 1
+                distances[nx][ny] = currentDist + 1
                 q.append((nx, ny))
+    if distances[mouse.currentx][mouse.currenty] == 255:
+        return False
                 
     return True 
 def displayDistances(distances):
@@ -336,7 +338,6 @@ def moveAlongPath(path):
 def firstRun():
     log("lan chay dau tien: bat dau scan")
     mouse = Mouse()
-    global visited
     i = 0
     while True:
         visited[mouse.currentx][mouse.currenty] = True
@@ -350,13 +351,19 @@ def firstRun():
         if API.wallRight():
             updateWall(walls,mouse.currentx,mouse.currenty,mouse.direction,"right")
 
-        keep_exploring = NewfloodFill(distances, walls, visited)
-        if not keep_exploring:
+        exploringState = floodFill(distances, walls, visited,mouse)
+        if not exploringState:
             break
         move(mouse,distances,walls)
+        displayDistances(distances)
     generateMaze(walls,"maze.json")
+    
     log("scan hoan tat, ket thuc luot chay")
 def secondRun(maze):
+    API.setColor(0,0,"G")
+    API.setColor(GOAL[0],GOAL[1],"R")
+    API.setText(0,0,"start")
+    API.setText(GOAL[0],GOAL[1],"goal")
     log("lan chay thu 2: chay duong ngan nhat")
     resizedGoal = (GOAL[0]*2+1,GOAL[1]*2+1)
     path = aStar(maze,resizedGoal)
